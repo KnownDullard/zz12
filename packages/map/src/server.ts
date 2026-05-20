@@ -6,7 +6,6 @@ import { Log } from './logger.js';
 import { MapCluster } from './map/map.process.js';
 import { HttpError, Request, Route } from './route.js';
 import { HealthRoute } from './routes/health.js';
-import { MapImageRoute } from './routes/map.image.js';
 import { MapActLevelRoute, MapActRoute, MapRoute } from './routes/map.js';
 
 class Diablo2MapServer {
@@ -57,7 +56,6 @@ class Diablo2MapServer {
     this.bind(new MapRoute());
     this.bind(new MapActRoute());
     this.bind(new MapActLevelRoute());
-    this.bind(new MapImageRoute());
 
     await new Promise<void>((resolve) => {
       this.server.listen(this.port, () => {

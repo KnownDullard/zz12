@@ -7,15 +7,12 @@ import { EventEmitter } from 'events';
 import PLimit from 'p-limit';
 import { createInterface } from 'readline';
 import { Log, LogType } from '../logger.js';
-import { run } from './child.process.js';
 import { LruCache } from './lru.js';
 import { Diablo2MapGenMessage, MapGenMessageInfo, MapGenMessageMap } from './map.js';
 import { F_OK } from 'constants';
 
 export const MapCommand = ['./bin/d2-map.exe', '../bin/d2-map.exe'];
-export const Diablo2Path = '/app/game';
-export const RegistryPath = '/app/d2.install.reg';
-export const WineCommand = 'wine';
+export const Diablo2Path = 'C:/Program Files (x86)/Diablo II';
 
 /** Wait at most 10 seconds for things to work */
 const ProcessTimeout = 30_000;
@@ -85,12 +82,8 @@ export class Diablo2MapProcess {
    */
   q = PLimit(1);
 
-  /** Get the version of WINE that is being used */
-  async version(log: LogType): Promise<string> {
-    const versionResponse = await run(WineCommand, ['--version']);
-    const version = versionResponse.stdout;
-    log.info({ version, command: WineCommand }, 'MapProcess:WineVersion');
-    return version;
+  async version(_log: LogType): Promise<string> {
+    return 'native-win32';
   }
 
   get isRunning(): boolean {
@@ -102,10 +95,10 @@ export class Diablo2MapProcess {
     if (this.isRunning) return;
     this.generatedCount = 0;
 
-    const args = [this.mapCommand, Diablo2Path];
-    log.info({ proc: this.id, wineArgs: args }, 'MapProcess:Starting');
+    const args = [Diablo2Path];
+    log.info({ proc: this.id, cmd: this.mapCommand, args }, 'MapProcess:Starting');
     return new Promise(async (resolve) => {
-      const proc = spawn(WineCommand, args, { cwd, env: { WINEPREFIX: process.env['WINEPREFIX'], WINEDEBUG: '-all' } });
+      const proc = spawn(this.mapCommand, args, { cwd });
       if (proc == null || proc.stdout == null) throw new Error('Failed to start command');
       this.process = proc;
       proc.stderr.on('data', (data) => {
@@ -296,11 +289,6 @@ export class MapCluster {
     const mapCommand = await findD2MapExe();
     if (mapCommand == null) throw new Error('MapProcess:MissingMapExe');
     log.info({ exe: mapCommand }, 'MapProcess:ExeFound');
-
-    if (await fileExists(RegistryPath)) {
-      const res = await run(WineCommand, ['regedit', RegistryPath]);
-      log.info({ data: res.stdout }, 'MapProcess:Registry:Update');
-    }
 
     return new MapCluster(mpq, mapCommand);
   }

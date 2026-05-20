@@ -11,7 +11,7 @@ import { LruCache } from './lru.js';
 import { Diablo2MapGenMessage, MapGenMessageInfo, MapGenMessageMap } from './map.js';
 import { F_OK } from 'constants';
 
-export const MapCommand = ['./bin/d2-map.exe', '../bin/d2-map.exe'];
+export const MapCommand = ['./bin/karte.exe', '../bin/karte.exe'];
 export const Diablo2Path = 'C:/Program Files (x86)/Diablo II';
 
 /** Wait at most 10 seconds for things to work */
